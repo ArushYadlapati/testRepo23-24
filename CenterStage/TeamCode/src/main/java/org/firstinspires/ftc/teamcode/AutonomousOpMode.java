@@ -3,9 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-/**
-File that moves and turns robot autonomously.
- */
+
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous
 /* Without this, this file will not show in the Autonomous section of the REV Driver Hub.
  Note that REV Driver Hub and REV Driver Station are synonymous. */
