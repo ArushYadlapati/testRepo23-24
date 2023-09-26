@@ -28,6 +28,8 @@
  */
 
 package org.firstinspires.ftc.teamcode;
+import android.annotation.SuppressLint;
+
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -143,6 +145,7 @@ public class AprilTagsDetection extends LinearOpMode {
     }
 
     //Function to add telemetry about AprilTag detections.
+    @SuppressLint("DefaultLocale")
     private void telemetryAprilTag() {
         List<VectorF> poses = new ArrayList<VectorF>();
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
