@@ -28,29 +28,25 @@
  */
 
 package org.firstinspires.ftc.teamcode;
-
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.Quaternion;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This 2023-2024 OpMode illustrates the basics of AprilTag recognition and pose estimation, using
- * the easy way.
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
- */
 @Autonomous()
-
 public class AprilTagsDetection extends LinearOpMode {
-
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
 
     /**
@@ -62,10 +58,17 @@ public class AprilTagsDetection extends LinearOpMode {
      * {@link #visionPortal} is the variable to store our instance of the vision portal.
      */
     private VisionPortal visionPortal;
+    public double myTagPoseX;
+    public double myTagPoseY;
+    public double myTagPoseZ;
+    public double myTagPosePitch;
+    public double myTagPoseRoll;
+    public double myTagPoseYaw;
+    public AprilTagLibrary aprilTagLibrary;
 
     @Override
     public void runOpMode() {
-
+        aprilTagLibrary = getCenterStageTagLibrary();
         initAprilTag();
 
         // Wait for the DS start button to be touched.
@@ -86,13 +89,9 @@ public class AprilTagsDetection extends LinearOpMode {
                 else {
                     telemetry.addData("Tag", "----------- none - ----------");
                 }
-                /* Needs Debugging
-                double myTagPoseX = aprilTag.ftcPose.x;
-                double myTagPoseY = aprilTag.ftcPose.y;
-                double myTagPoseZ = aprilTag.ftcPose.z;
-                */
 
-                // Push telemetry to the Driver Station.
+
+                // Push telemetry to the Driver Station.2
                 telemetry.update();
 
                 // Save CPU resources; can resume streaming when needed.
@@ -111,10 +110,21 @@ public class AprilTagsDetection extends LinearOpMode {
         visionPortal.close();
 
     }   // end method runOpMode()
-
-    /**
-     * Initialize the AprilTag processor.
-     */
+    public static AprilTagLibrary getCenterStageTagLibrary(){
+        return new AprilTagLibrary.Builder()
+                .addTag(1, "BlueAllianceLeft",     2, new VectorF(60.25f, 41.41f, 4f), DistanceUnit.INCH, new Quaternion( 0.683f, -0.183f, 0.183f, 0.683f, 0))
+                .addTag(2, "BLueAllianceCenter",   2, new VectorF(60.25f, 35.41f,4f), DistanceUnit.INCH, new Quaternion(  0.683f,  -0.183f, 0.183f,  0.683f, 0))
+                .addTag(3, "BlueAllianceRight",    2, new VectorF (60.25f, 29.41f,  4f), DistanceUnit.INCH, new Quaternion( 0.683f, -0.183f,0.183f,0.683f, 0))
+                .addTag(4, "RedAllianceLeft",      2, new VectorF  (60.25f,-29.41f,4f), DistanceUnit.INCH, new Quaternion(  0.683f,  -0.183f, 0.183f,  0.683f, 0))
+                .addTag(5, "RedAllianceCenter",    2, new VectorF (60.25f,-35.41f,4f), DistanceUnit.INCH, new Quaternion(  0.683f,  -0.183f, 0.183f,  0.683f, 0))
+                .addTag(6, "RedAllianceRight",     2, new VectorF (60.25f,-41.41f,4f), DistanceUnit.INCH, new Quaternion(  0.683f,  -0.183f, 0.183f, 0.683f, 0))
+                .addTag(7, "RedAudienceWallLarge", 5, new VectorF(-70.25f,-40.625f, 5.5f), DistanceUnit.INCH, new Quaternion(  0.7071f,  0, 0,  -7.071f, 0))
+                .addTag(8, "RedAudienceWaltSmall", 2, new VectorF  (-70.25f,-35.125f,4f), DistanceUnit.INCH, new Quaternion(  0.7071f,  0, 0,  -7.071f , 0))
+                .addTag(9, "BLueAudienceWaltSmall",2, new VectorF(-70.25f,35.125f,4), DistanceUnit.INCH, new Quaternion( 0.7071f,  0, 0,  -7.071f, 0))
+                .addTag(10,"BlueAudienceWallLarge",5, new VectorF(-70.25f,40.625f,5.5f), DistanceUnit.INCH, new Quaternion(  0.7071f,  0, 0,  -7.071f, 0))
+                .build();
+    }
+    //Initialize the AprilTag processor.
     private void initAprilTag() {
 
         // Create the AprilTag processor the easy way.
@@ -129,35 +139,45 @@ public class AprilTagsDetection extends LinearOpMode {
                     BuiltinCameraDirection.BACK, aprilTag);
         }
 
-    }   // end method initAprilTag()
 
-    /**
-     * Function to add telemetry about AprilTag detections.
-     */
+    }
+
+    //Function to add telemetry about AprilTag detections.
     private void telemetryAprilTag() {
-
+        List<VectorF> poses = new ArrayList<VectorF>();
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         telemetry.addData("# AprilTags Detected", currentDetections.size());
 
         // Step through the list of detections and display info for each one.
         for (AprilTagDetection detection : currentDetections) {
             if (detection.metadata != null) {
+                myTagPoseX = detection.ftcPose.x;
+                myTagPoseY = detection.ftcPose.y;
+                myTagPoseZ = detection.ftcPose.z;
+
+                // Testing Required
+                VectorF vector = new VectorF((float) -myTagPoseX, (float) -myTagPoseY, (float) -myTagPoseZ);
+                vector.add(aprilTagLibrary.lookupTag(detection.id).fieldPosition);
+                poses.add(vector);
+
+
+                myTagPosePitch = detection.ftcPose.pitch;
+                myTagPoseRoll = detection.ftcPose.roll;
+                myTagPoseYaw = detection.ftcPose.yaw;
                 telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
-                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
-                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
+                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", myTagPoseX, myTagPoseY, myTagPoseZ));
+                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", myTagPosePitch, myTagPoseRoll, myTagPoseYaw));
                 telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
             } else {
                 telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
                 telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
             }
-        }   // end for() loop
+        }
+        // Average all the poses you have, getting a singular pose vector which should be more accurate
 
         // Add "key" information to telemetry
-        telemetry.addLine("\nkey:\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
+        telemetry.addLine("\nk\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
         telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
         telemetry.addLine("RBE = Range, Bearing & Elevation");
-
-    }   // end method telemetryAprilTag()
-
-}   // end class
-
+    }
+}

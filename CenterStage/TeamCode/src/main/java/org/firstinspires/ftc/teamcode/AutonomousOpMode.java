@@ -49,14 +49,8 @@ public class AutonomousOpMode extends LinearOpMode {
         waitForStart(); // Wait for the game to start (driver presses PLAY).
 
         // Commands to move robot goes here
-        encoderMove(0, 1);
-        encoderMove(0, -1);
-        encoderMove(0, 2);
-        encoderMove(0, -2);
-        encoderMove(0, 4);
-        encoderMove(0, -4);
         turn(500);
-        turn(500);
+        turn(-500);
 
         // Display current motor encoder tick positions.
         telemetry.addData("Front Left Encoder", motorFrontLeft.getCurrentPosition());
@@ -68,7 +62,7 @@ public class AutonomousOpMode extends LinearOpMode {
 
     // Define a method to perform a move action in a specified direction for a given distance in feet.
     // Works best at ~15% maximum speed.
-    private void encoderMove(int direction, int distanceInFeet) {
+    private void encoderMove(int direction, int distanceInInches) {
         // Resets encoder value of viper slide motor to 0.
         motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -77,7 +71,7 @@ public class AutonomousOpMode extends LinearOpMode {
 
         double frontLeftPower, backLeftPower, frontRightPower, backRightPower;
 
-        int encoderTicks = distanceInFeet * 525; // Every 525 ticks = 1 foot moved.
+        int encoderTicks = distanceInInches * 525 / 12; // Every 525 ticks = 1 foot moved.
 
         // Determine motor powers based on the specified direction.
         switch (direction) {
@@ -171,23 +165,33 @@ public class AutonomousOpMode extends LinearOpMode {
         setMotorPower(0);
     }
 
-    // Method to turn the robot using encoders.
-    private void turn(double encoderTicks) {
-    // private void turn(double encoderTicks) {
-        // ****
-        /* Calculate the encoder ticks for the turn
+    private void turn(int encoderTicks) {
+        // Resets encoder value of viper slide motor to 0.
+        motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        double wheelbaseWidthInFeet = 1.0; // Adjust this based on your robot's wheelbase width
-        double wheelCircumferenceInFeet = 11.875 / 12.0; // Wheel circumference in feet
-        double encoderTicks = (Math.PI * wheelbaseWidthInFeet * degrees) / 360.0 / wheelCircumferenceInFeet * 1440.0;
+        double frontLeftPower, backLeftPower, frontRightPower, backRightPower;
 
-         */
+       if (encoderTicks > 0){
+           frontLeftPower = 0.15;
+           backLeftPower = 0.15;
+           frontRightPower = -0.15;
+           backRightPower = -0.15;
+       }
+       else {
+           frontLeftPower = -0.15;
+           backLeftPower = -0.15;
+           frontRightPower = 0.15;
+           backRightPower = 0.15;
+       }
 
-        // Set target positions for the motors to perform the turn.
-        int targetFrontLeft = motorFrontLeft.getCurrentPosition() + (int) encoderTicks;
-        int targetBackLeft = motorBackLeft.getCurrentPosition() + (int) encoderTicks;
-        int targetFrontRight = motorFrontRight.getCurrentPosition() - (int) encoderTicks;
-        int targetBackRight = motorBackRight.getCurrentPosition() - (int) encoderTicks;
+        // Set target encoder positions for each motor based on encoderTicks input.
+        int targetFrontLeft = motorFrontLeft.getCurrentPosition() -encoderTicks;
+        int targetBackLeft = motorBackLeft.getCurrentPosition() -encoderTicks;
+        int targetFrontRight = motorFrontRight.getCurrentPosition() -encoderTicks;
+        int targetBackRight = motorBackRight.getCurrentPosition() -encoderTicks;
 
         // Set target positions for each motor.
         motorFrontLeft.setTargetPosition(targetFrontLeft);
@@ -202,16 +206,18 @@ public class AutonomousOpMode extends LinearOpMode {
         motorBackRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Set motor powers.
-        double power = 0.5; // You can adjust the power based on your robot's capabilities.
-        motorFrontLeft.setPower(power);
-        motorBackLeft.setPower(power);
-        motorFrontRight.setPower(-power); // Reverse the direction for turning.
-        motorBackRight.setPower(-power); // Reverse the direction for turning.
+        motorFrontLeft.setPower(frontLeftPower);
+        motorBackLeft.setPower(backLeftPower);
+        motorFrontRight.setPower(frontRightPower);
+        motorBackRight.setPower(backRightPower);
 
         // Wait until the motors reach their targets.
         while (motorFrontLeft.isBusy() || motorBackLeft.isBusy() || motorFrontRight.isBusy() || motorBackRight.isBusy()) {
             assert true; // Passes.
         }
+
+        // Stop all motors.
+        setMotorPower(0);
     }
 
     // Define methods to set motor powers.
