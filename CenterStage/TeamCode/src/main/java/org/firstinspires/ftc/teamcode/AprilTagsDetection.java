@@ -74,6 +74,7 @@ public class AprilTagsDetection extends LinearOpMode {
         initAprilTag();
 
         // Wait for the DS start button to be touched.
+        // Adds Telemetry
         telemetry.addData( "DS preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">",  "Touch Play to start OpMode");
         telemetry.update();
@@ -93,7 +94,7 @@ public class AprilTagsDetection extends LinearOpMode {
                 }
 
 
-                // Push telemetry to the Driver Station.2
+                // Push telemetry to the Driver Station.
                 telemetry.update();
 
                 // Save CPU resources; can resume streaming when needed.
@@ -111,7 +112,7 @@ public class AprilTagsDetection extends LinearOpMode {
         // Save more CPU resources when camera is no longer needed.
         visionPortal.close();
 
-    }   // end method runOpMode()
+    }   // end method runOpMode().
     public static AprilTagLibrary getCenterStageTagLibrary(){
         return new AprilTagLibrary.Builder()
                 .addTag(1, "BlueAllianceLeft",     2, new VectorF(60.25f, 41.41f, 4f), DistanceUnit.INCH, new Quaternion( 0.683f, -0.183f, 0.183f, 0.683f, 0))
@@ -140,8 +141,6 @@ public class AprilTagsDetection extends LinearOpMode {
             visionPortal = VisionPortal.easyCreateWithDefaults(
                     BuiltinCameraDirection.BACK, aprilTag);
         }
-
-
     }
 
     //Function to add telemetry about AprilTag detections.
@@ -162,7 +161,6 @@ public class AprilTagsDetection extends LinearOpMode {
                 VectorF vector = new VectorF((float) -myTagPoseX, (float) -myTagPoseY, (float) -myTagPoseZ);
                 vector.add(aprilTagLibrary.lookupTag(detection.id).fieldPosition);
                 poses.add(vector);
-
 
                 myTagPosePitch = detection.ftcPose.pitch;
                 myTagPoseRoll = detection.ftcPose.roll;
